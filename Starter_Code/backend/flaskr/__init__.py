@@ -53,8 +53,7 @@ def create_app(test_config=None):
   Clicking on the page numbers should update the questions. 
   '''
   @app.route('/questions/<int:page>', methods=['GET'])
-  def retrieve_specific_questions():
-    print('halllo')
+  def retrieve_specific_questions(page):
     selection = Question.query.order_by(Question.id).all()
     current_questions = paginate_questions(request, selection)
 
@@ -66,7 +65,7 @@ def create_app(test_config=None):
         'success': True,
         'questions': current_questions,
         'total_questions': len(Question.query.all())
-    })
+        })
 
   @app.route('/questions', methods=['GET'])
   def retrieve_questions():
@@ -180,14 +179,15 @@ def create_app(test_config=None):
     return jsonify({
         'success': True,
         'questions': current_questions,
-        'total_questions': len(Question.query.all())
+        'total_questions': len(Question.query.all()),
+        'current_category': cat_id
       })
 
   @app.route('/categories', methods=['GET'])
   def retrieve_categories():
 
-    category = Category.query.order_by(Category.id).all()
-    categories = [question.format() for question in category]
+    categories = Category.query.order_by(Category.id).all()
+    formated_categories = [category.format() for category in categories]
 
 
     if len(categories) == 0:
@@ -195,7 +195,8 @@ def create_app(test_config=None):
 
     return jsonify({
         'success': True,
-        'questions': categories
+        'categories': formated_categories,
+        'total_categories': len(categories)
     })
 
 
