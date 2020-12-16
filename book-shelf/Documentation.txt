@@ -1,0 +1,15 @@
+Documentation.txt
+
+1. Introduction
+    What is the API doing
+2. Getting Started
+    BaseURL
+3. Error
+    Response codes, messages and error types and how they are returned (format)
+4. Resource endpoint library
+    Organized by ressource
+    Include each endpoint
+        Endpoint and expected method
+    Sample requests
+    Arguments including data types
+    Response object including status codes and data types
