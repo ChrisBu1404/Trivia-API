@@ -11,9 +11,7 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  CORS(app, resources={r"*": {"origins": '*'}}) 
-
-  
+  CORS(app, resources={r"*": {"origins": '*'}})
 
   def paginate_questions(request, selection):
     QUESTIONS_PER_PAGE = 10
@@ -26,15 +24,12 @@ def create_app(test_config=None):
 
     return current_questions
 
-
   @app.after_request
   def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
     #response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
-
-
 
   @app.route('/questions/<int:page>', methods=['GET'])
   def retrieve_specific_questions():
@@ -73,7 +68,6 @@ def create_app(test_config=None):
         'current_category': None
     })
 
-
   @app.route('/questions/<int:question_id>', methods=['DELETE'])
   def delete_question(question_id):
     try:
@@ -95,7 +89,6 @@ def create_app(test_config=None):
 
     except:
       abort(422)
-
 
   @app.route('/questions', methods=['POST'])
   def create_question():
@@ -119,8 +112,8 @@ def create_app(test_config=None):
           'current_category': None
         })
 
-
       else:
+
         question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
         question.insert()
 
@@ -170,45 +163,60 @@ def create_app(test_config=None):
   def retrieve_quiz():
     body = request.get_json()
     previous_questions = body.get('previous_questions', None)
+    len_previous_questions = len(previous_questions)
     quiz_category = body.get('quiz_category', None)
-    print(quiz_category)
     i=0
     for previous_question in previous_questions:
       previous_questions[i] = str(previous_question)
       i += 1
+    cat_len = [0,0,0,0,0,0]
+    #Get number of questions per category
 
+    cat_len[0] = len(Question.query.filter(Question.category == 1).all())
+    cat_len[1] = len(Question.query.filter(Question.category == 2).all())
+    cat_len[2] = len(Question.query.filter(Question.category == 3).all())
+    cat_len[3] = len(Question.query.filter(Question.category == 4).all())
+    cat_len[4] = len(Question.query.filter(Question.category == 5).all())
+    cat_len[5] = len(Question.query.filter(Question.category == 6).all())
 
-    if not previous_questions:
-      if quiz_category['id'] == 0:
-        question = choice(Question.query.all())
+    if len_previous_questions < cat_len[int(quiz_category['id'])-1]:
+
+      if not previous_questions:
+        if quiz_category['id'] == 0:
+          question = choice(Question.query.all())
+        else:
+          question = choice(Question.query.filter(Question.category == quiz_category['id']).all())
       else:
-        question = choice(Question.query.filter(Question.category == quiz_category['id']).all())
+        if quiz_category['id'] == 0:
+          question = choice(Question.query.filter(~Question.id.in_(previous_questions)).all())
+        else:
+          question = choice(Question.query.filter(Question.category == quiz_category['id']).filter(~Question.id.in_(previous_questions)).all())
+
+      formated_question = question.format()
+
+      if len(formated_question) == 0:
+          abort(404)
+
+      return jsonify({
+        'success': True,
+        'category': quiz_category,
+        'question': formated_question,
+        'previousQuestions': previous_questions
+      })
+
     else:
-      if quiz_category['id'] == 0:
-        question = choice(Question.query.filter(~Question.id.in_(previous_questions)).all())
-      else:
-        question = choice(Question.query.filter(Question.category == quiz_category['id']).filter(~Question.id.in_(previous_questions)).all())
+      print('hallo')
+      return jsonify({
+        'success': True,
+        'category': quiz_category,
+        'question': None,
+        'previousQuestions': previous_questions
+      })
 
-    formated_question = question.format()
-
-    if len(formated_question) == 0:
-        abort(404)
-
-    return jsonify({
-      'success': True,
-      'category': quiz_category,
-      'question': formated_question,
-      'previousQuestions': previous_questions
-    })
-  '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
-  '''
   @app.errorhandler(404)
   def not_found(error):
       return jsonify({
-          "success": False, 
+          "success": False,
           "error": 404,
           "message": "resource not found"
       }), 404
@@ -216,7 +224,7 @@ def create_app(test_config=None):
   @app.errorhandler(422)
   def unprocessable(error):
       return jsonify({
-          "success": False, 
+          "success": False,
           "error": 422,
           "message": "unprocessable"
       }), 422
@@ -224,7 +232,7 @@ def create_app(test_config=None):
   @app.errorhandler(400)
   def bad_request(error):
       return jsonify({
-          "success": False, 
+          "success": False,
           "error": 400,
           "message": "bad request"
       }), 400
@@ -232,7 +240,7 @@ def create_app(test_config=None):
   @app.errorhandler(500)
   def server_error(error):
       return jsonify({
-          "success": False, 
+          "success": False,
           "error": 500,
           "message": "internal server error"
       }), 500
@@ -240,5 +248,3 @@ def create_app(test_config=None):
 
 
   return app
-
-    

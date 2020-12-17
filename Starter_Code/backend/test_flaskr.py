@@ -69,19 +69,19 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data['questions']))
 
 
-    def test_delete_question(self):
-        """Test if question can be deleted"""
-        res = self.client().delete('/questions/6')
-        data = json.loads(res.data)
+    # def test_delete_question(self):
+    #     """Test if question can be deleted"""
+    #     res = self.client().delete('/questions/6')
+    #     data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 6).one_or_none()
+    #     question = Question.query.filter(Question.id == 6).one_or_none()
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 6)
-        self.assertTrue(data['total_questions'])
-        self.assertTrue(len(data['questions']))
-        self.assertEqual(question, None)
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertEqual(data['deleted'], 6)
+    #     self.assertTrue(data['total_questions'])
+    #     self.assertTrue(len(data['questions']))
+    #     self.assertEqual(question, None)
 
     def test_404_delete_if_question_does_not_exist(self):
         """Test if the question that is to deleted does not exist"""
@@ -159,20 +159,13 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_get_quiz_questions(self):
         """Test quit questions can be retrieved"""
-        res = self.client().post('/quizzes', json={'previous_questions': [3], 'quiz_category':{'type': 'Sports','id':"6"}})
+        res = self.client().post('/quizzes', json={'previous_questions': [3], 'quiz_category':{'type': 'Sports','id':6}})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(len(data['question']))
 
-    def test_get_quiz_questions_fails(self):
-        """Test quit questions cannot be retrieved"""
-        res = self.client().post('/quizzes', json={'previous_questions': [3], 'quiz_category':{'type': 'Darts','id':"60"}})
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 500)
-        self.assertEqual(data['success'], False)
 
 
 
