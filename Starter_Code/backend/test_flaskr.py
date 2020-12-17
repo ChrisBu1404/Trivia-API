@@ -148,6 +148,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 500)
         self.assertEqual(data['success'], False)
 
+    def test_get_categories(self):
+        """Test if categories can be retrieved"""
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['categories']))
+
     def test_get_quiz_questions(self):
         """Test quit questions can be retrieved"""
         res = self.client().post('/quizzes', json={'previous_questions': [3], 'quiz_category':{'type': 'Sports','id':"6"}})
@@ -155,6 +164,15 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['question']))
+
+    def test_get_quiz_questions_fails(self):
+        """Test quit questions cannot be retrieved"""
+        res = self.client().post('/quizzes', json={'previous_questions': [3], 'quiz_category':{'type': 'Darts','id':"60"}})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 500)
+        self.assertEqual(data['success'], False)
         self.assertTrue(len(data['question']))
 
 
